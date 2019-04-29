@@ -48,3 +48,5 @@
       (reduce + (for [i (range 0 128)
                       j (range 0 128)]
                   (if (remove-region bs i j) 1 0))))))
+
+;; My comment
