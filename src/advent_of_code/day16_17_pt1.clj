@@ -28,19 +28,23 @@
         :else (throw (IllegalArgumentException. (str "No instruction match for: " instr)))))))
 
 (def test-input [(into (sorted-map) (zipmap (range 0 16) "abcde"))
-                 (parse-instructions (clojure.string/split "s1,x3/4,pe/b" #","))])
+                 (parse-instructions (clojure.string/split "s1,x3/4,pe/b" #","))
+                 {}])
 
 (defn input []
   [(into (sorted-map) (zipmap (range 0 16) "abcdefghijklmnop"))
    (-> (io/resource "day16-17.txt")
        slurp
        (clojure.string/split #",")
-       parse-instructions)])
+       parse-instructions)
+   {}])
 
-(defn permutation-promenade [[orig-programs orig-instructions]]
-  (loop [programs orig-programs [instr & instructions] orig-instructions]
-    (if-not instr
-      [programs orig-instructions]
-      (recur (instr programs) instructions))))
-        
+(defn permutation-promenade [[orig-programs orig-instructions programs->next]]
+  (if (programs->next orig-programs)
+    [(programs->next orig-programs) orig-instructions programs->next] ;; we already have answer
+    (loop [programs orig-programs [instr & instructions] orig-instructions]
+      (if-not instr
+        [programs orig-instructions (assoc programs->next orig-programs programs)]
+        (recur (instr programs) instructions)))))
+
 
