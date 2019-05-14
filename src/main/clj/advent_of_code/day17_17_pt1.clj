@@ -1,15 +1,23 @@
 (ns advent-of-code.day17-17-pt1
-  (:require [clojure.java.io :as io]))
+  (:import (advent_of_code.java LinkedListNode)
+           (java.util Date)))
 
-
-(defn step-insert [[index step val buffer]]
-  (let [insert-index (inc (mod (+ index step) (count buffer)))
-        [xs ys] (split-at insert-index buffer)]
-    [insert-index step (inc val) (concat xs (cons val ys))]))
+(defn step-insert [[step val node]]
+  (loop [step step node node next-node (.getNext node)]
+    (if (<= step 0)
+      (do
+        (when (= (mod val 1000000) 0)
+          (println (str "Reached: " val " at " (Date.))))
+        (.setNext node (LinkedListNode. val next-node))
+        [step (inc val) (.getNext node)])
+      (recur (dec step) (.getNext node) (.. node (getNext) (getNext))))))
 
 (defn spinlock [step]
-  (loop [index 0 val 1 buffer (list 0)]
-    (if (> val 50000000)
-      (nth buffer 1)
-      (let [[new-index _ new-val new-buffer] (step-insert [index step val buffer])]
-        (recur new-index new-val new-buffer)))))
+  (let [root (LinkedListNode. 0 nil)]
+    (do
+      (.setNext root root) ;; circular
+      (loop [val 1 node root]
+        (if (> val 50000000)
+          (.. root (getNext) (getVal))
+          (let [[_ new-val cur-node] (step-insert [step val node])]
+            (recur new-val cur-node)))))))
