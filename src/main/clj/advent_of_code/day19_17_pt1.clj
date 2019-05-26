@@ -42,15 +42,15 @@
 (defn series-of-tubes [input]
   (let [lines     (s/split-lines input)
         start-col (s/index-of (first lines) \|)]
-    (loop [[row col :as pos] [0 start-col] dir :d letters ""]
+    (loop [[row col :as pos] [0 start-col] dir :d letters "" steps 0]
       (if-not (position? lines pos)
-        letters
+        [letters steps]
         (let [pos-char (-> lines
                            (nth row)
                            (nth col))]
           (case pos-char
-            (\| \-) (recur (advance pos dir) dir letters)
+            (\| \-) (recur (advance pos dir) dir letters (inc steps))
             \+      (let [nxt (next-dir lines pos dir)]
-                      (recur (advance pos nxt) nxt letters))
-            (recur (advance pos dir) dir (str letters pos-char))))))))
+                      (recur (advance pos nxt) nxt letters (inc steps)))
+            (recur (advance pos dir) dir (str letters pos-char) (inc steps))))))))
 
