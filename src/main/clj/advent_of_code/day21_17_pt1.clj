@@ -3,11 +3,15 @@
             [clojure.java.io :as io]))
 
 (def seed-pattern
-  ".#.
-..#
-###")
+  ".#./..#/###")
 
-(defn parse-rules [raw])
+(defn ->vec [pattern]
+  (mapv vec (s/split pattern #"\/")))
+
+(defn parse-rules [raw]
+  (into {} (for [line (s/split-lines raw)
+                 :let [[pattern rule] (s/split line #" => ")]]
+             [(->vec pattern) (->vec rule)])))
 
 (defn rules []
   (parse-rules (slurp (io/resource "day21-17.txt"))))
