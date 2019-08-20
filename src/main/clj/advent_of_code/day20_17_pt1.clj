@@ -1,5 +1,6 @@
 (ns advent-of-code.day20-17-pt1
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [clojure.java.io :as io]))
 
 (def test-particles
   "p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>
@@ -27,6 +28,8 @@ p=<4,0,0>, v=<0,0,0>, a=<-2,0,0>")
 
 (def zc 2)
 
+(def base [[0 0 0] [0 0 0] [0 0 0]])
+
 (defn increase [p ks1 ks2]
   (update-in p ks1 #(+ % (get-in p ks2))))
 
@@ -40,26 +43,36 @@ p=<4,0,0>, v=<0,0,0>, a=<-2,0,0>")
       (increase [pos zc] [vel zc])))
 
 (defn particles-abs-diff [p1 p2]
-  (reduce + (map #(Math/abs (- %1 %2)) (flatten p1) (flatten p2))))
+  (reduce + (map #(Math/abs (- %1 %2)) (p1 pos) (p2 pos))))
 
-(defn particle-abs-move [p]
+(defn particle-base-dist [p]
+  (reduce + (map #(Math/abs %) (p pos))))
+
+(defn particle-abs-single-move [p]
+  (particles-abs-diff p (update-particle p)))
+
+(defn particle-abs-move-growth [p]
   (Math/abs
-   (-
-    (particles-abs-diff p (update-particle p))
-    (particles-abs-diff (update-particle p) (update-particle (update-particle p))))))
-
-(defn particle-abs-base-diff [p]
-  (particles-abs-diff [[0 0 0] [0 0 0] [0 0 0]] p))
+   (- (particle-abs-single-move p) (particle-abs-single-move (update-particle p)))))
 
 (defn compare-particles [p1 p2]
   (cond
-    (< (particle-abs-move p1) (particle-abs-move p2)) -1
-    (< (particle-abs-move p2) (particle-abs-move p1)) 1
-    :else (compare (particle-abs-base-diff p1) (particle-abs-base-diff p2))))
+    (< (particle-abs-move-growth p1)(particle-abs-move-growth p2))  -1
+    (< (particle-abs-move-growth p2)(particle-abs-move-growth p1))   1
+    (< (particle-abs-single-move p1) (particle-abs-single-move p2)) -1
+    (< (particle-abs-single-move p2) (particle-abs-single-move p1))  1
+    :else
+    (compare (particle-base-dist p1) (particle-base-dist p2))))
 
 (def test-input
   (vec (parse-particles test-particles)))
 
+(def input
+  (vec (parse-particles (slurp (io/resource "day20-17.txt")))))
+
 (defn particle-swarm [input]
   (let [p (first (sort-by identity compare-particles input))]
     (.indexOf input p)))
+
+;;; POSITION!!!! AHHHHHH
+;;; HMMM...Didn't work. Maybe just come back some time and try a simple brute force simulation.
