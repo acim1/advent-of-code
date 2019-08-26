@@ -33,30 +33,32 @@
   ((comp flip transpose) p))
 
 
-(defn match? [p r]
-  (some #(= r %) (concat
+(defn some-match [p rs]
+  (some (set rs) (concat
                   (take 4 (iterate rotate-clockwise p))
                   (take 4 (iterate rotate-clockwise (flip p))))))
 
-(defn next-block [x y p block-size]
-  (loop [i 0 block []]
-    (if (>= i block-size)
-      block
-      (recur (inc i) (conj block (subvec (nth p (+ y i)) x block-size))))))
+(defn next-square [x y p square-size]
+  (loop [i 0 square []]
+    (if (>= i square-size)
+      square
+      (recur (inc i) (conj square (subvec (nth p (+ y i)) x (+ x square-size)))))))
 
-(defn blocks [p block-size]
+(defn squares [p square-size]
   (loop [x 0 y 0 bs []]
     (cond
       (< x (size p))
-      (recur (+ x block-size) y (conj bs (next-block x y p block-size)))
+      (recur (+ x square-size) y (conj bs (next-square x y p square-size)))
 
-      (< (+ y block-size) (size p))
-      (recur block-size (+ y block-size) (conj bs (next-block 0 (+ y block-size) p block-size)))
+      (< (+ y square-size) (size p))
+      (recur square-size (+ y square-size) (conj bs (next-square 0 (+ y square-size) p square-size)))
 
       :else bs)))
 
 (defn break [p]
   (let [n (if (zero? (mod (size p) 2)) 2 3)]
-    (blocks n)))
+    (squares p n)))
+
+(defn join-squares [bs])
 
 (defn fractal-art [])
