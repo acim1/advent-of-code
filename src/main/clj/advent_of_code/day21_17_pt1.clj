@@ -65,14 +65,11 @@
 
 (defn join-squares [squares]
   (let [n (int (Math/sqrt (count squares)))]
-    (mapv concat-rows (partition n squares))))
+    (vec (mapcat concat-rows (partition n squares)))))
 
 (defn fractal-art [iterations rules]
   (loop [n iterations p (->vec seed-pattern)]
-    (do
-      (println p)
-      (println n)
-      (if (zero? n)
-        (cons (count (filter #(= % \#) (flatten p))) p)
-        (recur (dec n) (join-squares (mapv #(some-match % rules) (break p))))))))
+    (if (zero? n)
+      (cons (count (filter #(= % \#) (flatten p))) p)
+      (recur (dec n) (join-squares (mapv #(some-match % rules) (break p)))))))
 
