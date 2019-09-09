@@ -44,21 +44,27 @@
       square
       (recur (inc i) (conj square (subvec (nth p (+ y i)) x (+ x square-size)))))))
 
-(defn squares [p square-size]
-  (loop [x 0 y 0 bs []]
+(defn ->squares [p square-size]
+  (loop [x 0 y 0 squares []]
     (cond
       (< x (size p))
-      (recur (+ x square-size) y (conj bs (next-square x y p square-size)))
+      (recur (+ x square-size) y (conj squares (next-square x y p square-size)))
 
       (< (+ y square-size) (size p))
-      (recur square-size (+ y square-size) (conj bs (next-square 0 (+ y square-size) p square-size)))
+      (recur square-size (+ y square-size) (conj squares (next-square 0 (+ y square-size) p square-size)))
 
-      :else bs)))
+      :else squares)))
 
 (defn break [p]
   (let [n (if (zero? (mod (size p) 2)) 2 3)]
-    (squares p n)))
+    (->squares p n)))
 
-(defn join-squares [bs])
 
-(defn fractal-art [])
+(defn concat-rows [squares]
+  (mapv vec (apply map concat squares)))
+
+(defn join-squares [squares]
+  (let [n (int (Math/sqrt (count squares)))]
+    (mapv concat-rows (partition n squares))))
+
+(defn fractal-art [n])
