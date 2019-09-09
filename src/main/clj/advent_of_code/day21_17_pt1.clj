@@ -34,9 +34,9 @@
 
 
 (defn some-match [p rs]
-  (some (set rs) (concat
-                  (take 4 (iterate rotate-clockwise p))
-                  (take 4 (iterate rotate-clockwise (flip p))))))
+  (rs (some (set (keys rs)) (concat
+                             (take 4 (iterate rotate-clockwise p))
+                             (take 4 (iterate rotate-clockwise (flip p)))))))
 
 (defn next-square [x y p square-size]
   (loop [i 0 square []]
@@ -67,4 +67,12 @@
   (let [n (int (Math/sqrt (count squares)))]
     (mapv concat-rows (partition n squares))))
 
-(defn fractal-art [n])
+(defn fractal-art [iterations rules]
+  (loop [n iterations p (->vec seed-pattern)]
+    (do
+      (println p)
+      (println n)
+      (if (zero? n)
+        (cons (count (filter #(= % \#) (flatten p))) p)
+        (recur (dec n) (join-squares (mapv #(some-match % rules) (break p))))))))
+
